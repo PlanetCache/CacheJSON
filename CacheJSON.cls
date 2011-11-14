@@ -11,6 +11,8 @@ Class CacheJSON Extends %String
 		Date: 10/27/2011
 		Version 1.1
 		Description: Added method for encoding a simple cache object, containing simple datatypes.
+					 Added method to return an object as an %ArrayOfDataTypes as a helper when creating a %ListOfDataTypes,
+					 	containing an array of objects to be encoded.
 			
 	*/
 Parameter EscapeChar As COSEXPRESSION = "$LB($LB(""\"",""\\""),$LB($C(13),""\n""),$LB($C(10),""\r""),$LB($C(9),""\t""),$LB("""""""",""\""""""),$LB($C(8),""\b""),$LB($C(12),""\f""))";
@@ -276,6 +278,31 @@ Method GetJSONFromObject() As %String [ CodeMode = objectgenerator ]
     
 	    // Return an encoded JSON string of the object
 	    Do %code.WriteLine(" Quit ..Encode(array)")
+	}
+}
+
+/// Returns the object as an %ArrayOfDataTypes key=>value pair set.
+/// This is helpful when trying to return a %ListOfDataTypes in JSON form, by quickly building an array object to Insert.
+/// Uses all object properties that do not start with a % char.
+Method GetAsArrayOfDataTypes() As %ArrayOfDataTypes [ CodeMode = objectgenerator ]
+{
+	// Only create this method when compiling other classes this is extended upon
+	If (%compiledclass.Name '= "Spectrum.Util.CacheJSON") {
+		
+		// Wrap the object in an array
+		Do %code.WriteLine(" Set array = ##class(%ArrayOfDataTypes).%New()")
+	
+		// Rip through each property of the class.. that does not start with a %
+		// Insert each property as a key=>value pair in the array
+		For i = 1:1:%compiledclass.Properties.Count() {
+	        Set prop = %compiledclass.Properties.GetAt(i).Name
+	        IF ($EXTRACT(prop) '= "%") {
+		        Do %code.WriteLine(" Do array.SetAt(.."_prop_","""_prop_""")")
+	        }
+	    }
+    
+	    // Return an %ArrayOfDataTypes representation of the object
+	    Do %code.WriteLine(" Quit array")
 	}
 }
 
