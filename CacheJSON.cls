@@ -5,7 +5,13 @@ Class CacheJSON Extends %String
 /*
 		Original Code By: Yonatan
 		Date: 03/14/2010
-		Version: 1.0		
+		Version: 1.0
+		
+		Modified by: Dan McCracken
+		Date: 10/27/2011
+		Version 1.1
+		Description: Added method for encoding a simple cache object, containing simple datatypes.
+			
 	*/
 Parameter EscapeChar As COSEXPRESSION = "$LB($LB(""\"",""\\""),$LB($C(13),""\n""),$LB($C(10),""\r""),$LB($C(9),""\t""),$LB("""""""",""\""""""),$LB($C(8),""\b""),$LB($C(12),""\f""))";
 
@@ -247,6 +253,30 @@ ClassMethod Parse(pStr As CacheJSON) As %ArrayOfDataTypes
 ClassMethod Stringify(pData As %DataType) As CacheJSON
 {
   Quit ##class(CacheJSON).Encode(pData)
+}
+
+/// Return an encoded JSON string of the object.<br>
+/// Uses all object properties that do not start with a % char.
+Method GetJSONFromObject() As %String [ CodeMode = objectgenerator ]
+{
+	// Only create this method when compiling other classes this is extended upon
+	If (%compiledclass.Name '= "Spectrum.Util.CacheJSON") {
+		
+		// Wrap the object in an array
+		Do %code.WriteLine(" Set array = ##class(%ArrayOfDataTypes).%New()")
+	
+		// Rip through each property of the class.. that does not start with a %
+		// Insert each property as a key=>value pair in the array
+		For i = 1:1:%compiledclass.Properties.Count() {
+	        Set prop = %compiledclass.Properties.GetAt(i).Name
+	        IF ($EXTRACT(prop) '= "%") {
+		        Do %code.WriteLine(" Do array.SetAt(.."_prop_","""_prop_""")")
+	        }
+	    }
+    
+	    // Return an encoded JSON string of the object
+	    Do %code.WriteLine(" Quit ..Encode(array)")
+	}
 }
 
 }
