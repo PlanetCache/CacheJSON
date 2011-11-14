@@ -13,6 +13,8 @@ Class CacheJSON Extends %String
 		Description: Added method for encoding a simple cache object, containing simple datatypes.
 					 Added method to return an object as an %ArrayOfDataTypes as a helper when creating a %ListOfDataTypes,
 					 	containing an array of objects to be encoded.
+					 Fixed a bug that allowed %String property types to be unescaped when they qualified for $ISVALIDNUM()
+					 	Strings containing a period character need to be escaped with quotes.
 			
 	*/
 Parameter EscapeChar As COSEXPRESSION = "$LB($LB(""\"",""\\""),$LB($C(13),""\n""),$LB($C(10),""\r""),$LB($C(9),""\t""),$LB("""""""",""\""""""),$LB($C(8),""\b""),$LB($C(12),""\f""))";
@@ -229,6 +231,14 @@ ClassMethod Encode(data As %DataType) As %String
       s cad="["_cad_"]"
       q cad
     }
+  }
+  elseif ($FIND(data,".")) {
+	;; This $ISVALIDNUM below is causing some %String property types that are valid numbers (ie. .1293394) to be unescaped
+  	;; $ISVALIDNUM allows for periods. Need to check for a . in another elseif and escape it like a string "".
+
+	//type string
+    q:data="" "null"
+    q """"_..Escape(data)_""""
   }
   elseif $ISVALIDNUM(data) {
     // type number
