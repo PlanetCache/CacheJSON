@@ -15,6 +15,7 @@ Class CacheJSON Extends %String
 					 	containing an array of objects to be encoded.
 					 Fixed a bug that allowed %String property types to be unescaped when they qualified for $ISVALIDNUM()
 					 	Strings containing a period character need to be escaped with quotes.
+					 Added classmethod to return an object loaded with the properties from an encoded JSON string.
 			
 	*/
 Parameter EscapeChar As COSEXPRESSION = "$LB($LB(""\"",""\\""),$LB($C(13),""\n""),$LB($C(10),""\r""),$LB($C(9),""\t""),$LB("""""""",""\""""""),$LB($C(8),""\b""),$LB($C(12),""\f""))";
@@ -313,6 +314,30 @@ Method GetAsArrayOfDataTypes() As %ArrayOfDataTypes [ CodeMode = objectgenerator
     
 	    // Return an %ArrayOfDataTypes representation of the object
 	    Do %code.WriteLine(" Quit array")
+	}
+}
+
+/// Returns an OREF populated with the values from the JSON
+/// Uses all object properties that do not start with a % char.
+ClassMethod GetObjectFromJSON(JSON As %String) As %RegisteredObject [ CodeMode = objectgenerator ]
+{
+	// Only create this method when compiling other classes this is extended upon
+	If (%compiledclass.Name '= "Spectrum.Util.CacheJSON") {
+		Do %code.WriteLine(" Set return = ##class("_%compiledclass.Name_").%New()")
+	
+		Do %code.WriteLine(" Set myDecodedArray = ..Decode(JSON)")
+		
+		// Rip through each property of the class.. that does not start with a %
+		// Insert each property into the object to return
+		For i = 1:1:%compiledclass.Properties.Count() {
+	        Set prop = %compiledclass.Properties.GetAt(i).Name
+	        IF ($EXTRACT(prop) '= "%") {
+		        //Do %code.WriteLine(" Do array.SetAt(.."_prop_","""_prop_""")")
+		        Do %code.WriteLine(" Set return."_prop_" = myDecodedArray.GetAt("""_prop_""")")
+	        }
+	    }
+	    
+		Do %code.WriteLine(" Quit return")
 	}
 }
 
