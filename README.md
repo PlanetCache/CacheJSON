@@ -15,7 +15,7 @@ The primary features of CacheJSON are:
 * Embed an array as the value of an element
 * Convert a Cache object instance into an %ArrayOfDataTypes
 
-The original code originated from the [Intersystem's Zen Google Group Community](http://groups.google.com/group/intersystems-zen), however, the base for this class was taken from [Yontan's Blog](http://blog.yonatan.me/2010/03/objectscript-json-decoderencoder.html) and added to GitHub by [@mccrackend](http://twitter.com/#!/mccrackend)for proper tracking of enhancements and maintenance.
+The original code originated from the [Intersystem's Zen Google Group Community](http://groups.google.com/group/intersystems-zen), however, the base for this class was taken from [Yontan's Blog](http://blog.yonatan.me/2010/03/objectscript-json-decoderencoder.html) and added to GitHub by [@mccrackend](http://twitter.com/#!/mccrackend) for proper tracking of enhancements and maintenance.
 
 Cache does not come with any native JSON support, necessitating a third party utility to translate JSON strings to & from Cache objects for web applications.
 
