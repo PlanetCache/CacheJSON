@@ -5,6 +5,7 @@ CacheJSON is a JSON encoder/decoder for [Intersystems Cache](http://www.intersys
 It can be used as a stand-alone utility class or extended inside your own custom classes to "JSON Enable" your objects.
 
 The primary features of CacheJSON are:
+
 * Decode a single JSON object into an %ArrayOfDataTypes
 * Decode nested arrays of JSON objects into a %ListOfObjects containing %ArrayOfDataTypes
 * Decode a single JSON object into a custom Cache object
