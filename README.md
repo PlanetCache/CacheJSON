@@ -34,7 +34,7 @@ Import the class into your `namespace` and compile.
 
 Then simply extend `CacheJSON` on the class you wish to use it with:
 
-``` Cache Object Script
+``` ruby
 Class Sample.Person Extends (%Persistent, %Populate, CacheJSON) [ ClassType = persistent, Inheritance = right ]
 ````
 
