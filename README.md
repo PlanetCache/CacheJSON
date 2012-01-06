@@ -60,11 +60,11 @@ Below I'll go through some of the common uses and flows you can use with CacheJS
 An `%ArrayOfDataTypes` is a simple Key/Value pair dictionary object used in Cache.  CacheJSON will parse this object into a JSON string with the same key/value pairs contained in this object.  Below is sample code to create this array and encode it to a JSON string.
 
 ``` ruby
-  Set myArray = ##class(%ArrayOfDataTypes).%New()
-	Do myArray.SetAt("Dan","FirstName")
-	Do myArray.SetAt("McCracken","LastName")
-	Do myArray.SetAt("01/01/1983","DOB")
-	Set jsonString = ##class(CacheJSON).Encode(myArray)
+Set myArray = ##class(%ArrayOfDataTypes).%New()
+Do myArray.SetAt("Dan","FirstName")
+Do myArray.SetAt("McCracken","LastName")
+Do myArray.SetAt("01/01/1983","DOB")
+Set jsonString = ##class(CacheJSON).Encode(myArray)
 ````
 
 Creates a string like so:
