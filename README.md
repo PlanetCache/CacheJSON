@@ -69,7 +69,7 @@ An `%ArrayOfDataTypes` is a simple Key/Value pair dictionary object used in Cach
 
 Creates a string like so:
 
-``` Cache Object Script
+``` ruby
 {"DOB":"01/01/1983","FirstName":"Dan","LastName":"McCracken"}
 ````
 
