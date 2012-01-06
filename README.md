@@ -4,6 +4,8 @@ CacheJSON is a JSON encoder/decoder for [Intersystems Cache](http://www.intersys
 
 It can be used as a stand-alone utility class or extended inside your own custom classes to "JSON Enable" your objects.
 
+A handy way to validate that the JSON is legal is to copy the string into this site http://json.parser.online.fr/
+
 The primary features of CacheJSON are:
 
 * Decode a single JSON object into an %ArrayOfDataTypes
@@ -55,18 +57,35 @@ Below I'll go through some of the common uses and flows you can use with CacheJS
 
 ### Encode an %ArrayOfObjects
 
-An `%ArrayOfObjects` is a simple Key/Value pair dictionary object used in Cache.  CacheJSON will parse this object into a JSON string with the same key/value pairs contained in this object.  Below is sample code to create this array and encode it to a JSON string.
+An `%ArrayOfDataTypes` is a simple Key/Value pair dictionary object used in Cache.  CacheJSON will parse this object into a JSON string with the same key/value pairs contained in this object.  Below is sample code to create this array and encode it to a JSON string.
 
 ``` ruby
-Set myArray = ##class(%ArrayOfDataTypes).%New()
-Do myArray.SetAt("Dan","FirstName")
-Do myArray.SetAt("McCracken","LastName")
-Do myArray.SetAt("01/01/1983","DOB")
-Set jsonString = ##class(CacheJSON).Encode(myArray)
+  Set myArray = ##class(%ArrayOfDataTypes).%New()
+	Do myArray.SetAt("Dan","FirstName")
+	Do myArray.SetAt("McCracken","LastName")
+	Do myArray.SetAt("01/01/1983","DOB")
+	Set jsonString = ##class(CacheJSON).Encode(myArray)
+````
+
+Creates a string like so:
+
+``` Cache Object Script
+{"DOB":"01/01/1983","FirstName":"Dan","LastName":"McCracken"}
+````
+
+### Encode a %ListOfDataTypes containing arrays
+
+A `%ListOfDataTypes` is a simple array object used in Cache.  Insert a bunch of %ArrayOfDataTypes into the list, and CacheJSON will translate this into a JSON array.  Below is sample code using a list:
+
+``` ruby
+Set list = ##class(%ListOfDataTypes).%New()
+Set sc = list.Insert(arr1)
+Set sc = list.Insert(arr2)
+Set encodedList = ##class(CacheJSON).Encode(list)
 ````
 
 Creates a string like so:
 
 ``` ruby
-{"DOB":"01/01/1983","FirstName":"Dan","LastName":"McCracken"}
+[{"DOB":"01/01/1983","FirstName":"Dan","LastName":"McCracken"},{"DOB":"12/31/1978","FirstName":"Ron","LastName":"Sweeney"}]
 ````
