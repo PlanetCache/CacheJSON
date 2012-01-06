@@ -89,3 +89,36 @@ Creates a string like so:
 ``` ruby
 [{"DOB":"01/01/1983","FirstName":"Dan","LastName":"McCracken"},{"DOB":"12/31/1978","FirstName":"Ron","LastName":"Sweeney"}]
 ````
+
+### Encode an array as an element value
+
+Set the value of an item to another %ArrayOfDataTypes.  Example below:
+
+``` ruby
+Set message = ##class(%ArrayOfDataTypes).%New()
+Do message.SetAt("Posting to Campfire from Cache!","body")
+Set payload = ##class(%ArrayOfDataTypes).%New()
+Do payload.SetAt(message,"message")
+Set jsonPost = ##class(CacheJSON).Encode(payload)
+````
+
+Creates a string like so:
+
+``` ruby
+{"message":{"body":"Posting to Campfire from Cache!"}}
+````
+
+### Encode a %Persistent object
+
+After you extend the persistent class with the CacheJSON class (see instructions above), you can call a method to simply project the object as a JSON string.  Example below:
+
+``` ruby
+Set obj = ##class(Sample.Person).%OpenId(1)
+Set jsonString = obj.GetJSONFromObject()
+````
+
+Creates a string like so:
+
+``` ruby
+{"DOB":40434,"MyBool":null,"Name":"Bolt  Usain","SSN":"722-81-1666"}
+````
