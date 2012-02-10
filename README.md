@@ -231,6 +231,24 @@ This code generates an array of 3 JSON encoded Person objects that look like thi
 
 ## Tests
 
+There is a set of tests included in the repository that originated from [Yontan's Blog](http://blog.yonatan.me/2010/03/objectscript-json-decoderencoder.html) that is a standard Cache `%UnitTest.TestCase`.
 
+To run the test, use a command like:
+
+``` ruby
+Do ##class(%UnitTest.Manager).RunTest("TestJSON:TestJSON","/noload/norecursive/nodelete")
+````
 
 ## Contributing
+
+If you find something that looks like a bug:
+
+1. Check the [GitHub issue tracker](http://github.com/PlanetCache/CacheJSON/issues) to see if it's a known issue.
+2. If you don't see anything, create an issue with information on how to reproduce it.
+
+If you want to contribute an enhancement or a fix:
+
+1. Fork the project on GitHub.
+2. Make your changes and (optionally) update the test class.
+3. Commit the changes to your forked repo.
+4. Send a pull request.
