@@ -57,7 +57,7 @@ Below I'll go through some of the common uses and flows you can use with CacheJS
 
 ### Encode an %ArrayOfObjects
 
-An `%ArrayOfDataTypes` is a simple Key/Value pair dictionary object used in Cache.  CacheJSON will parse this object into a JSON string with the same key/value pairs contained in this object.  Below is sample code to create this array and encode it to a JSON string.
+An `%ArrayOfDataTypes` is a simple Key/Value pair dictionary object used in Cache.  `CacheJSON` will parse this object into a JSON string with the same key/value pairs contained in this object.  Below is sample code to create this array and encode it to a JSON string.
 
 ``` ruby
 Set myArray = ##class(%ArrayOfDataTypes).%New()
@@ -75,9 +75,19 @@ Creates a string like so:
 
 ### Encode a %ListOfDataTypes containing arrays
 
-A `%ListOfDataTypes` is a simple array object used in Cache.  Insert a bunch of %ArrayOfDataTypes into the list, and CacheJSON will translate this into a JSON array.  Below is sample code using a list:
+A `%ListOfDataTypes` is a simple array object used in Cache.  Insert a bunch of `%ArrayOfDataTypes` into the list, and `CacheJSON` will translate this into a JSON array.  Below is sample code using a list:
 
 ``` ruby
+Set arr1 = ##class(%ArrayOfDataTypes).%New()
+Do arr1.SetAt("Dan","FirstName")
+Do arr1.SetAt("McCracken","LastName")
+Do arr1.SetAt("01/01/1983","DOB")
+
+Set arr2 = ##class(%ArrayOfDataTypes).%New()
+Do arr2.SetAt("Ron","FirstName")
+Do arr2.SetAt("Sweeney","LastName")
+Do arr2.SetAt("12/31/1978","DOB")
+
 Set list = ##class(%ListOfDataTypes).%New()
 Set sc = list.Insert(arr1)
 Set sc = list.Insert(arr2)
@@ -92,7 +102,7 @@ Creates a string like so:
 
 ### Encode an array as an element value
 
-Set the value of an item to another %ArrayOfDataTypes.  Example below:
+Set the value of an item to another `%ArrayOfDataTypes`.  Example below:
 
 ``` ruby
 Set message = ##class(%ArrayOfDataTypes).%New()
@@ -110,7 +120,7 @@ Creates a string like so:
 
 ### Encode a %Persistent object
 
-After you extend the persistent class with the CacheJSON class (see instructions above), you can call a method to simply project the object as a JSON string.  Example below:
+After you extend the persistent class with the `CacheJSON` class (see instructions above), you can call a method to simply project the object as a JSON string.  Example below:
 
 ``` ruby
 Set obj = ##class(Sample.Person).%OpenId(1)
@@ -122,3 +132,105 @@ Creates a string like so:
 ``` ruby
 {"DOB":40434,"MyBool":null,"Name":"Bolt  Usain","SSN":"722-81-1666"}
 ````
+
+### Decode a single JSON object
+
+Given a JSON string representing a single object:
+
+``` ruby
+{"DOB":57311,"Name":"Dan McCracken","SSN":"192-20-3003"}
+````
+
+`CacheJSON` creates an `%ArrayOfDataTypes` object containing all the properties using the Decode() method.
+
+``` ruby
+Set myDecodedArray = ##class(CacheJSON).Decode(encodedString)
+Do $System.OBJ.Dump(myDecodedArray)
+
++----------------- general information ---------------
+|      oref value: 3
+|      class name: %Library.ArrayOfDataTypes
+| reference count: 1
++----------------- attribute values ------------------
+|        Data("DOB") = 57311
+|       Data("Name") = "Dan McCracken"
+|        Data("SSN") = "192-20-3003"
+|        ElementType = "%String"
+````
+
+### Decode an array of JSON objects
+
+Given a JSON string representing an array of JSON objects:
+
+``` ruby
+[{"DOB":33997,"Name":"Koivu,Phyllis Z.","SSN":"676-82-4467"},{"DOB":61685,"Name":"Kelvin,Kristen S.","SSN":"546-95-9170"},{"DOB":53364,"Name":"DeLillo,Alexandra O.","SSN":"566-60-9488"}]
+````
+
+`CacheJSON` will decode this array into a `%ListOfDataTypes` with nodes containing `%ArrayOfDataTypes` that represent each decoded object individually.
+
+``` ruby
+Set myDecodedArray = ##class(User.Util.CacheJSON).Decode(arrString)
+Do $System.OBJ.Dump(myDecodedArray)
++----------------- general information ---------------
+|      oref value: 7
+|      class name: %Library.ListOfDataTypes
+| reference count: 1
++----------------- attribute values ------------------
+|            Data(1) = "12@%Library.ArrayOfDataTypes"
+|            Data(2) = "14@%Library.ArrayOfDataTypes"
+|            Data(3) = "16@%Library.ArrayOfDataTypes"
+|        ElementType = ""
+|               Size = 3  <Set>
+
+Do $System.OBJ.Dump(myDecodedArray.GetAt(1))
++----------------- general information ---------------
+|      oref value: 12
+|      class name: %Library.ArrayOfDataTypes
+| reference count: 1
++----------------- attribute values ------------------
+|        Data("DOB") = 33997
+|       Data("Name") = "Koivu,Phyllis Z."
+|        Data("SSN") = "676-82-4467"
+|        ElementType = "%String"
+````
+
+### Decode a single JSON object into a custom Cache object
+
+Given a JSON string with keys that map to a custom Cache object:
+
+``` ruby
+{"DOB":57311,"Name":"Dan McCracken","SSN":"192-20-3003"}
+````
+
+When `CacheJSON` is extended on the object you're trying to map the JSON string to, you can create a new object containing the JSON values as properties using the GetObjectFromJSON() method.
+
+``` ruby
+USER> Set newPerson = ##class(Sample.Person).GetObjectFromJSON(encodedJSON)
+USER> Write newPerson.Name
+Dan McCracken
+````
+
+### Convert a Cache object into an %ArrayOfDataTypes
+
+This is a helper method that will translate your object into an `%ArrayOfDataTypes`, allowing you to quickly build up a `%ListOfDataTypes` to Encode() as a return value for your methods.  Using this method inside a quick loop generates a desired list:
+
+``` ruby
+Set list = ##class(%ListOfDataTypes).%New()
+For x=1:1:3 {
+	Set obj = ##class(Sample.Person).%OpenId(x)
+	Set sc = list.Insert(obj.GetAsArrayOfDataTypes())
+}
+Set encodedList = ##class(Sample.Person).Encode(list)
+````
+
+This code generates an array of 3 JSON encoded Person objects that look like this:
+
+``` ruby
+[{"DOB":33997,"Name":"Koivu,Phyllis Z.","SSN":"676-82-4467","Spouse":null},{"DOB":61685,"Name":"Kelvin,Kristen S.","SSN":"546-95-9170","Spouse":null},{"DOB":53364,"Name":"DeLillo,Alexandra O.","SSN":"566-60-9488","Spouse":null}]
+````
+
+## Tests
+
+
+
+## Contributing
