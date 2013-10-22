@@ -242,6 +242,12 @@ ClassMethod Encode(data As %DataType) As %String
     q """"_..Escape(data)_""""
   }
   elseif $ISVALIDNUM(data) {
+  
+    ;; If this number begins with a leading 0, and is followed by another digit, then it should be quoted.
+    if ($MATCH(data, "^0[0-9].*")=1) {
+ 	Q """"_data_""""
+    }
+  
     // type number
     q data
     
