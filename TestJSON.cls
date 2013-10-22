@@ -78,4 +78,35 @@ Method TestJSON()
     Do $$$AssertEquals(1,0,"Exception thrown - " _ tException.Code_ ": " _ tException.Name _ " " _ tException.Data _ " " _ tException.Location)
   }
 }
+Method TestLeadingZerosValuesAreEscaped()
+{
+	Set input = "000123"
+	set output = ##class(App.API.Helper.CacheJSON).Encode(input)
+	set expected = """"_input_""""
+	Do $$$AssertEquals(output, expected, "Checking that a number with leading zeros is escaped")
+}
+
+Method TestZeroValueIsNotEscaped()
+{
+	Set input = "0"
+	set output = ##class(App.API.Helper.CacheJSON).Encode(input)
+	set expected = input
+	Do $$$AssertEquals(output, expected, "Checking that a zero value is not escaped")
+}
+
+Method TestZeroFollowedByDecimalIsNotQuoted()
+{
+	Set input = "0.1"
+	set output = ##class(App.API.Helper.CacheJSON).Encode(input)
+	set expected = """"_input_""""
+	Do $$$AssertEquals(output, expected, "Checking that a zero value followed by a decimal is not escaped")
+}
+
+Method TestMultipleZerosFollowedByDecimalIsQuoted()
+{
+	Set input = "00.1"
+	set output = ##class(App.API.Helper.CacheJSON).Encode(input)
+	set expected = """"_input_""""
+	Do $$$AssertEquals(output, expected, "Checking that a zero value followed by a decimal is not escaped")
+}
 }
