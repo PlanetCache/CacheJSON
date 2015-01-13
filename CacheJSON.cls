@@ -17,7 +17,14 @@ Class CacheJSON Extends %String
 					 	Strings containing a period character need to be escaped with quotes.
 					 Added classmethod to return an object loaded with the properties from an encoded JSON string.
 			
+		Modified by: Yuval Golan
+		Date: 12/17/2014
+		Version 1.2
+		Description: Fixed a bug that allowed %String property types to be unescaped when they qualified for $ISVALIDNUM()
+		                Strings containing only numeric characters that start with zero (i.e. "0123")
+		             Fixed a bug that returned inner objects as %ArrayOfDataTypes instead of there class type.
 	*/
+
 Parameter EscapeChar As COSEXPRESSION = "$LB($LB(""\"",""\\""),$LB($C(13),""\n""),$LB($C(10),""\r""),$LB($C(9),""\t""),$LB("""""""",""\""""""),$LB($C(8),""\b""),$LB($C(12),""\f""))";
 
 Parameter UnEscapeChar As COSEXPRESSION = "$LB(""\\"",""\n"",""\r"",""\t"",""\"""""",""\b"",""\f"")";
@@ -241,7 +248,8 @@ ClassMethod Encode(data As %DataType) As %String
     q:data="" "null"
     q """"_..Escape(data)_""""
   }
-  elseif $ISVALIDNUM(data) {
+  elseif $ISVALIDNUM(data)&&((data=0)||($e(data)'=0)) {
+	  ;; If it's a numeric string that start with zero (ie. 0123) then it's not a number, but still $ISVALIDNUM will return true.
     // type number
     q data
     
@@ -329,11 +337,24 @@ ClassMethod GetObjectFromJSON(JSON As %String) As %RegisteredObject [ CodeMode =
 		
 		// Rip through each property of the class.. that does not start with a %
 		// Insert each property into the object to return
+		#dim prop As %Dictionary.CompiledProperty
 		For i = 1:1:%compiledclass.Properties.Count() {
-	        Set prop = %compiledclass.Properties.GetAt(i).Name
-	        IF ($EXTRACT(prop) '= "%") {
+	        Set prop = %compiledclass.Properties.GetAt(i)
+	        set propName=prop.Name
+	        IF ($EXTRACT(propName) '= "%") {
+		        set propType=prop.Type
+		        set propTypeClass="" if propType'="" set propTypeClass=##class(%Dictionary.CompiledClass).%OpenId(propType)
+		        set isOBJ=0 if $isobject(propTypeClass),propTypeClass.ClassType'="datatype" set isOBJ=1
 		        //Do %code.WriteLine(" Do array.SetAt(.."_prop_","""_prop_""")")
-		        Do %code.WriteLine(" Set return."_prop_" = myDecodedArray.GetAt("""_prop_""")")
+		        if (isOBJ) {
+			        Do %code.Write(" set strJSON = ..Encode(myDecodedArray.GetAt("""_propName_"""))")
+			        Do %code.WriteLine(" // As "_propType_" (class)")
+			        Do %code.WriteLine(" Set return."_propName_" = ##class("_propType_").GetObjectFromJSON(strJSON)")
+		        }
+		        else {
+			        Do %code.Write(" Set return."_propName_" = myDecodedArray.GetAt("""_propName_""")")
+			        Do %code.WriteLine(" // As "_propType_" (datatype)")
+		        }
 	        }
 	    }
 	    
