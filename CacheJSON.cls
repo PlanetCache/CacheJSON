@@ -21,7 +21,8 @@ Class CacheJSON Extends %String
 		Date: 12/17/2014
 		Version 1.2
 		Description: Fixed a bug that allowed %String property types to be unescaped when they qualified for $ISVALIDNUM()
-		                Strings containing only numeric characters that start with zero (i.e. "0123")
+		                For example strings containing only numeric characters that start with zero (i.e. "0123") and strings
+                                that start with a plus sign and then numeric characters (i.e. "+123").
 		             Fixed a bug that returned inner objects as %ArrayOfDataTypes instead of there class type.
 	*/
 
@@ -241,16 +242,14 @@ ClassMethod Encode(data As %DataType) As %String
     }
   }
   elseif ($FIND(data,".")) {
-	;; This $ISVALIDNUM below is causing some %String property types that are valid numbers (ie. .1293394) to be unescaped
-  	;; $ISVALIDNUM allows for periods. Need to check for a . in another elseif and escape it like a string "".
+	;; Valid numbers that start with period (ie. .1293394) should be escaped like a string.
 
-	//type string
-    q:data="" "null"
+    //type string
     q """"_..Escape(data)_""""
   }
-  elseif $ISVALIDNUM(data)&&((data=0)||($e(data)'=0)) {
-	  ;; If it's a numeric string that start with zero (ie. 0123) then it's not a number, but still $ISVALIDNUM will return true.
-    // type number
+  elseif (+data=data) {
+  	;; If it's a numeric value then return the value as is.
+    //type number
     q data
     
   }
