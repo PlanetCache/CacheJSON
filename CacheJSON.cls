@@ -241,7 +241,7 @@ ClassMethod Encode(data As %DataType) As %String
     q:data="" "null"
     q """"_..Escape(data)_""""
   }
-  elseif $ISVALIDNUM(data) {
+  elseif $ISVALIDNUM(data) && ($l(data) = $l($number(data))) {
     // type number
     q data
     
